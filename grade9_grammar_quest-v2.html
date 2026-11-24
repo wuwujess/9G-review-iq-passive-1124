@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>森靈小隊大冒險：文法花圃探險隊 (九年級英文互動特訓)</title>
+<style>
+  :root {
+    --primary: #2e8b57;
+    --primary-hover: #246f45;
+    --secondary: #f59e0b;
+    --accent: #ec4899;
+    --mint: #d1fae5;
+    --cream: #fffbeb;
+    --sky: #e0f2fe;
+    --danger: #e11d48;
+    --text: #334155;
+    --text-muted: #64748b;
+    --card: #ffffff;
+  }
+
+  * { box-sizing: border-box; font-family: 'Nunito', 'Rounded Mplus 1c', 'Microsoft JhengHei', sans-serif; }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #dcfce7 0%, #fef9c3 50%, #e0f2fe 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 860px;
+    padding: 20px;
+    margin-top: 12px;
+  }
+
+  /* 頂部森靈小隊花圃狀態列 */
+  .hud-bar {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    padding: 18px 25px;
+    box-shadow: 0 8px 20px rgba(46, 139, 87, 0.12);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    border: 3px solid #a7f3d0;
+  }
+
+  .squad-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .sprout-pot {
+    font-size: 2.8rem;
+    background: #fef3c7;
+    width: 74px;
+    height: 74px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #fcd34d;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .sprout-pot.bounce {
+    animation: popBounce 0.6s ease;
+  }
+
+  @keyframes popBounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    35% { transform: scale(1.22) rotate(-8deg); }
+    70% { transform: scale(1.15) rotate(8deg); }
+  }
+
+  .squad-info h3 { margin: 0 0 4px 0; font-size: 1.15rem; color: var(--primary); }
+  .squad-info p { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
+
+  /* 森靈小隊收集列 */
+  .squad-members {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .member-slot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  .member-slot.unlocked {
+    background: #ecfdf5;
+    border: 2px solid #34d399;
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(52, 211, 153, 0.3);
+  }
+
+  .stats-box {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .stat-item {
+    text-align: center;
+    background: #f8fafc;
+    padding: 8px 14px;
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .stat-val { font-weight: 800; font-size: 1.15rem; color: var(--primary); }
+  .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+  /* 陽光露水進度條 */
+  .xp-container {
+    width: 100%;
+    background: #e2e8f0;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #34d399, #fbbf24, #f472b6);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* 主遊戲卡片 */
+  .game-card {
+    background: var(--card);
+    border-radius: 26px;
+    padding: 30px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    border: 3px solid #e2e8f0;
+    position: relative;
+  }
+
+  /* 探險區域卡片 */
+  .stage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+  }
+
+  .stage-card {
+    border: 3px solid #e2e8f0;
+    border-radius: 22px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #f8fafc;
+  }
+
+  .stage-card:hover {
+    transform: translateY(-5px);
+    border-color: #34d399;
+    box-shadow: 0 10px 20px rgba(52, 211, 153, 0.18);
+  }
+
+  .stage-card.completed {
+    border-color: #34d399;
+    background: #ecfdf5;
+  }
+
+  .stage-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .lv1 { background: #dcfce7; color: #15803d; }
+  .lv2 { background: #fef3c7; color: #b45309; }
+  .lv3 { background: #fce7f3; color: #be185d; }
+
+  /* 題目區 */
+  .q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px dashed #cbd5e1;
+  }
+
+  .q-tag {
+    background: #ecfdf5;
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .q-prompt {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.65;
+    margin: 20px 0;
+    color: #1e293b;
+  }
+
+  .q-hint {
+    font-size: 0.92rem;
+    color: #475569;
+    background: #fffbeb;
+    padding: 12px 16px;
+    border-left: 5px solid #fbbf24;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* 選擇題按鈕 */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .option-btn {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 1.05rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: #34d399;
+    background: #f0fdf4;
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--primary);
+    background: #dcfce7;
+    font-weight: bold;
+  }
+
+  .option-btn.correct {
+    border-color: #10b981;
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--danger);
+    background: #ffe4e6;
+    color: #9f1239;
+  }
+
+  /* 填空題輸入框 */
+  .fill-input {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1.15rem;
+    border: 3px solid #cbd5e1;
+    border-radius: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .fill-input:focus { border-color: #34d399; }
+
+  /* 句子重組 */
+  .scramble-answer-box {
+    min-height: 64px;
+    border: 3px dashed #86efac;
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #f0fdf4;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .scramble-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 52px;
+  }
+
+  .word-chip {
+    background: white;
+    border: 2px solid #34d399;
+    color: #065f46;
+    padding: 8px 15px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+  }
+  .word-chip:hover { background: #dcfce7; transform: translateY(-2px); }
+  .word-chip.in-answer { background: #10b981; color: white; border-color: #10b981; }
+
+  /* 回饋解析框 */
+  .feedback-box {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 16px;
+    display: none;
+    line-height: 1.65;
+  }
+  .feedback-box.success { background: #ecfdf5; border: 2px solid #6ee7b7; color: #065f46; }
+  .feedback-box.error { background: #fff1f2; border: 2px solid #fda4af; color: #9f1239; }
+
+  /* 按鈕區 */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+  .btn-secondary { background: #f1f5f9; color: var(--text); border: 2px solid #cbd5e1; box-shadow: none; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-accent { background: #f59e0b; color: white; }
+  .btn-accent:hover { background: #d97706; transform: translateY(-2px); }
+
+  .hidden { display: none !important; }
+
+  /* 錯題筆記 */
+  .mistake-item {
+    background: #fff1f2;
+    border-left: 5px solid #fb7185;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HUD: 皮克敏風格「森靈小隊花圃」養成列 -->
+  <div class="hud-bar">
+    <div class="squad-box">
+      <div class="sprout-pot" id="sproutPot">🌱</div>
+      <div class="squad-info" style="flex:1;">
+        <h3 id="squadTitle">萌芽小花圃 • 隊伍人數：1 / 7</h3>
+        <p id="squadDesc">答題收集陽光露水，把可愛的森靈夥伴全部拔出來吧！</p>
+        <div class="xp-container">
+          <div class="xp-bar" id="xpBar"></div>
+        </div>
+        <!-- 7隻可收集的可愛森靈夥伴 -->
+        <div class="squad-members" id="squadSlots"></div>
+      </div>
+    </div>
+    <div class="stats-box">
+      <div class="stat-item">
+        <div class="stat-val" id="scoreVal">0</div>
+        <div class="stat-label">☀️ 陽光露水</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="streakVal">0 ✨</div>
+        <div class="stat-label">連對Combo</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="solvedVal">0 / 45</div>
+        <div class="stat-label">🌸 開花進度</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 畫面 1：花圃探險地圖 -->
+  <div class="game-card" id="mapScreen">
+    <h1 style="margin-top:0; color:var(--primary); font-size:1.65rem;">🌼 森靈小隊大冒險：文法花圃探險隊</h1>
+    <p style="color:var(--text-muted); line-height:1.65;">
+      歡迎加入森靈探險隊！這趟旅程將以九年級核心的<strong>「被動語態」</strong>與<strong>「間接問句 (wh- / whether / if)」</strong>為主軸，並搭配<strong>現在完成式、關係代名詞、附加問句</strong>等會考常見文法一起探險。每累積陽光露水，就能從土裡拔出新的可愛森靈夥伴喔！
+    </p>
+
+    <div class="stage-grid">
+      <div class="stage-card" id="card-lv1" onclick="startStage(1)">
+        <span class="stage-badge lv1">第一區 • 暖陽初階</span>
+        <h3>🍀 幸運草微風草原</h3>
+        <p style="font-size:0.9rem; color:var(--text-muted);">現在/過去式被動、基礎 Wh- 間接問句、基礎完成式與附和句</p>
+        <p style="font-weight:800; color:var(--primary);" id="prog-lv1">開花進度：0 / 15 朵</p>
+      </div>
+
+      <div class="stage-card" id="card-lv2" onclick="startStage(2)">
+        <span class="stage-badge lv2">第二區 • 露水進階</span>
+        <h3>🌻 向日葵蜂蜜花園</h3>
+        <p style="font-size:0.9rem; color:var(--text-muted);">助動詞/完成式/進行式被動、whether / if 用法、關代與附加問句</p>
+        <p style="font-weight:800; color:var(--primary);" id="prog-lv2">開花進度：0 / 15 朵</p>
+      </div>
+
+      <div class="stage-card" id="card-lv3" onclick="startStage(3)">
+        <span class="stage-badge lv3">第三區 • 夢幻挑戰</span>
+        <h3>🌸 櫻花樹下的秘密基地</h3>
+        <p style="font-size:0.9rem; color:var(--text-muted);">使役/感官動詞被動、時態一致性、名詞子句與複合文法整合</p>
+        <p style="font-weight:800; color:var(--primary);" id="prog-lv3">開花進度：0 / 15 朵</p>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:28px; justify-content: flex-end;">
+      <button class="btn btn-secondary" onclick="showMistakeBook()">📒 森靈觀察筆記 (<span id="mistakeCount">0</span>)</button>
+      <button class="btn btn-accent" onclick="startAllRandom()">🌈 隨機大探險 (全45題)</button>
+    </div>
+  </div>
+
+  <!-- 畫面 2：答題互動區 -->
+  <div class="game-card hidden" id="quizScreen">
+    <div class="q-header">
+      <div>
+        <span class="q-tag" id="qStageTag">第一區 • 第 1/15 題</span>
+        <span class="q-tag" id="qTypeTag" style="background:#fef3c7; color:#b45309; margin-left:6px;">選擇題</span>
+      </div>
+      <button class="btn btn-secondary" style="padding:6px 16px; font-size:0.85rem;" onclick="returnToMap()">🏡 回到花圃</button>
+    </div>
+
+    <div class="q-prompt" id="qPrompt">題目載入中...</div>
+    <div class="q-hint hidden" id="qHint"></div>
+
+    <!-- 題型容器 -->
+    <div id="mcContainer" class="options-grid hidden"></div>
+    
+    <div id="fillContainer" class="hidden">
+      <input type="text" id="fillInput" class="fill-input" placeholder="在這裡輸入英文答案（大小寫皆可喔）..." autocomplete="off">
+    </div>
+
+    <div id="scrambleContainer" class="hidden">
+      <div style="font-size:0.88rem; color:var(--text-muted); margin-bottom:8px;">👇 點擊下方花瓣單字卡組成正確句子（點錯可以再點一下退回）：</div>
+      <div class="scramble-answer-box" id="scrambleAnswer"></div>
+      <div class="scramble-bank" id="scrambleBank"></div>
+    </div>
+
+    <!-- 解析回饋 -->
+    <div class="feedback-box" id="feedbackBox"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="hintBtn" onclick="toggleHint()">💡 呼叫森靈提示</button>
+      <div>
+        <button class="btn btn-primary" id="submitBtn" onclick="checkAnswer()">💧 澆水送出答案</button>
+        <button class="btn btn-accent hidden" id="nextBtn" onclick="nextQuestion()">繼續前進 ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 畫面 3：結算 / 觀察筆記 -->
+  <div class="game-card hidden" id="resultScreen">
+    <h2 id="resultTitle" style="color:var(--primary); margin-top:0;">🎉 探險完成！</h2>
+    <p id="resultSummary" style="font-size:1.08rem; line-height:1.6;"></p>
+    <div id="mistakeListContainer" style="margin-top:20px;"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="returnToMap()">🏡 回到森靈花圃</button>
+      <button class="btn btn-accent hidden" id="retryMistakesBtn" onclick="retryMistakes()">🌱 重新培育錯題</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 題庫設計：共 45 題 (每級 15 題)
+// 比例分配：約 75% 為「被動語態」與「間接問句(wh-/whether/if)」，約 25% 融入九年級重要文法（現在完成式、關係代名詞、附加問句、情緒分詞、so/neither附和句等）
+const questionsDB = [
+  // ================= LEVEL 1: 暖陽初階 (15題) =================
+  {
+    id: 1, level: 1, type: 'mc', topic: '現在簡單式被動',
+    prompt: 'English ______ in many countries around the world.',
+    options: ['speaks', 'is spoken', 'is speaking', 'spoke'],
+    answer: 'is spoken',
+    hint: '主詞 English (英文) 是「被說」，普遍事實用現在簡單式被動 (am/is/are + p.p.)。',
+    explanation: '英文是被許多國家的人所說，屬於被動語態，因此選 is spoken。'
+  },
+  {
+    id: 2, level: 1, type: 'mc', topic: '過去簡單式被動',
+    prompt: 'The cute puppy ______ by my sister in the park yesterday.',
+    options: ['found', 'was finding', 'was found', 'is found'],
+    answer: 'was found',
+    hint: 'yesterday 表示過去式，且小狗是「被發現」，find 的過去分詞是 found。',
+    explanation: '過去簡單式被動公式為 was/were + p.p.，故選 was found。'
+  },
+  {
+    id: 3, level: 1, type: 'mc', topic: 'Wh- 間接問句語序',
+    prompt: 'Do you know where ______?',
+    options: ['does Kevin live', 'Kevin lives', 'did Kevin live', 'is Kevin living'],
+    answer: 'Kevin lives',
+    hint: '間接問句要把語序改回「主詞 + 動詞」的直述句順序，不可以再留著助動詞 does！',
+    explanation: '原問句 Where does Kevin live? 放進 Do you know 後，去掉 does，動詞 live 配合第三人稱單數加 s，變成 where Kevin lives。'
+  },
+  {
+    id: 4, level: 1, type: 'mc', topic: '【延伸文法】現在完成式 (since/for)',
+    prompt: 'Mia and I ______ good friends since we were in elementary school.',
+    options: ['are', 'were', 'have been', 'will be'],
+    answer: 'have been',
+    hint: '看到 since + 過去時間點，代表動作從過去一直持續到現在，要用現在完成式 (have/has + p.p.)！',
+    explanation: 'since 引導過去時間點，主要子句需使用現在完成式，主詞為複數，故選 have been。'
+  },
+  {
+    id: 5, level: 1, type: 'fill', topic: '現在簡單式被動 (填空)',
+    prompt: '請填入正確的被動語態形式：<br>These strawberry cakes ______ (make) by the baker every morning.',
+    answer: ['are made'],
+    hint: '主詞 cakes 為複數，every morning 表示現在習慣，make 的過去分詞為 made。',
+    explanation: '複數主詞搭配現在簡單式被動，be 動詞用 are，加上過去分詞 made → are made。'
+  },
+  {
+    id: 6, level: 1, type: 'fill', topic: 'Wh- 間接問句 (be動詞)',
+    prompt: '合併句子：Can you tell me? + What is her favorite song?<br>→ Can you tell me what ______ ______ ______?',
+    answer: ['her favorite song is'],
+    hint: '把 is 移到主詞 her favorite song 的後面就可以了！',
+    explanation: '間接問句維持「疑問詞 + 主詞 + 動詞」，即 what her favorite song is。'
+  },
+  {
+    id: 7, level: 1, type: 'fill', topic: '過去簡單式被動 (填空)',
+    prompt: '請填入正確的被動語態形式：<br>This famous picture ______ (take) in Kyoto last spring.',
+    answer: ['was taken'],
+    hint: 'last spring 為過去時間，take 的三態為 take - took - taken。',
+    explanation: '照片在去年春天「被拍攝」，單數主詞配過去式被動 → was taken。'
+  },
+  {
+    id: 8, level: 1, type: 'scramble', topic: '現在簡單式被動 (重組)',
+    prompt: '句子重組：這座花園每天都被細心照顧 (taken care of)。',
+    words: ['The', 'garden', 'is', 'taken', 'care', 'of', 'every', 'day.'],
+    answer: 'The garden is taken care of every day.',
+    hint: '主詞(The garden) + is + taken care of + 時間。',
+    explanation: '正確語序為：The garden is taken care of every day.'
+  },
+  {
+    id: 9, level: 1, type: 'scramble', topic: 'Wh- 間接問句 (重組)',
+    prompt: '句子重組：請告訴我公車站（the bus stop）在哪裡。',
+    words: ['Please', 'tell', 'me', 'where', 'the', 'bus', 'stop', 'is.'],
+    answer: 'Please tell me where the bus stop is.',
+    hint: 'Please tell me 開頭，接疑問詞 where + 主詞 + be動詞。',
+    explanation: '間接問句直述語序：Please tell me where the bus stop is.'
+  },
+  {
+    id: 10, level: 1, type: 'mc', topic: '被動語態動作執行者',
+    prompt: 'The Harry Potter books were written ______ J.K. Rowling.',
+    options: ['with', 'for', 'by', 'to'],
+    answer: 'by',
+    hint: '被動語態中，表示「被某人……」要使用哪個介系詞？',
+    explanation: '被動語態後面接動作執行者，介系詞使用 by。'
+  },
+  {
+    id: 11, level: 1, type: 'mc', topic: 'Wh- 間接問句 (疑問詞當主詞)',
+    prompt: 'Nobody knows who ______ the flowers on the teacher's desk.',
+    options: ['put', 'did put', 'was put', 'putting'],
+    answer: 'put',
+    hint: '原問句為 Who put the flowers...? 這裡的 who 本身就是主詞，且 put 的三態同形 (put-put-put)！',
+    explanation: '當疑問詞 who 本身當主詞時，直接問句與間接問句的語序完全相同，過去式為 put。'
+  },
+  {
+    id: 12, level: 1, type: 'mc', topic: '【延伸文法】情緒分詞形容詞 (-ed / -ing)',
+    prompt: 'The magic show was so ______ that all the students clapped loudly.',
+    options: ['excite', 'excited', 'exciting', 'excitement'],
+    answer: 'exciting',
+    hint: '主詞是「魔術表演（事物）」，令人感到興奮的要用 -ing 結尾的分詞形容詞！',
+    explanation: '修飾事物（令人……的）用 V-ing，故選 exciting（excited 用來形容人感到興奮）。'
+  },
+  {
+    id: 13, level: 1, type: 'fill', topic: 'Wh- 間接問句 (填空)',
+    prompt: '改寫為間接問句：What time does the concert start?<br>→ Could you tell me what time ______ ______ ______?',
+    answer: ['the concert starts'],
+    hint: '去掉助動詞 does 之後，記得動詞 start 要加上 s！',
+    explanation: 'the concert 為第三人稱單數，去掉 does 後動詞需變化為 starts → the concert starts。'
+  },
+  {
+    id: 14, level: 1, type: 'scramble', topic: '過去簡單式被動 (重組)',
+    prompt: '句子重組：這封卡片是昨天寄出的 (sent)。',
+    words: ['This', 'card', 'was', 'sent', 'yesterday.'],
+    answer: 'This card was sent yesterday.',
+    hint: 'send 的過去分詞是 sent。',
+    explanation: '正確語序為：This card was sent yesterday.'
+  },
+  {
+    id: 15, level: 1, type: 'scramble', topic: '【延伸文法】too...to... 句型 (重組)',
+    prompt: '句子重組：這杯熱可可太燙了以致於不能喝。',
+    words: ['The', 'hot', 'cocoa', 'is', 'too', 'hot', 'to', 'drink.'],
+    answer: 'The hot cocoa is too hot to drink.',
+    hint: '主詞 + be動詞 + too + 形容詞 + to + 原形動詞。',
+    explanation: 'too + adj. + to V 表示「太……而不能……」，正確語序為：The hot cocoa is too hot to drink.'
+  },
+
+  // ================= LEVEL 2: 露水進階 (15題) =================
+  {
+    id: 16, level: 2, type: 'mc', topic: 'whether / if 間接問句',
+    prompt: 'I am not sure ______ it will be sunny tomorrow.',
+    options: ['that', 'whether', 'what', 'which'],
+    answer: 'whether',
+    hint: '原問句為 Will it be sunny tomorrow? 是 Yes/No 問句，合併時要用「是否」連接。',
+    explanation: 'Yes/No 問句改為間接問句時，需用 whether 或 if 引導，表示「是否」。'
+  },
+  {
+    id: 17, level: 2, type: 'mc', topic: '未來式與助動詞被動',
+    prompt: 'The classroom rules must ______ by every student.',
+    options: ['follow', 'be followed', 'followed', 'be following'],
+    answer: 'be followed',
+    hint: '助動詞 must 後面必須接「原形動詞」，被動語態的原形是 be + p.p.。',
+    explanation: '助動詞被動公式：助動詞 (must/will/can/should) + be + p.p.，故選 be followed。'
+  },
+  {
+    id: 18, level: 2, type: 'mc', topic: '現在完成式被動',
+    prompt: 'The science project ______ by Chloe already, so she can take a rest now.',
+    options: ['has finished', 'has been finished', 'was finished', 'is finished'],
+    answer: 'has been finished',
+    hint: '看到 already 想到現在完成式 (have/has + p.p.)，加上被動語態就變成 have/has been + p.p.。',
+    explanation: '專題報告「已經被完成」，現在完成式被動為 has been finished。'
+  },
+  {
+    id: 19, level: 2, type: 'mc', topic: 'whether 與 if 的用法差異',
+    prompt: 'We haven't decided ______ or not we will have a picnic this Sunday.',
+    options: ['if', 'whether', 'that', 'when'],
+    answer: 'whether',
+    hint: '注意後面緊跟著 "or not"！哪一個字可以直接與 or not 連用？',
+    explanation: 'whether or not 可以連用，而 if 後面不能直接加 or not，因此只能選 whether。'
+  },
+  {
+    id: 20, level: 2, type: 'mc', topic: '【延伸文法】關係代名詞 (who / which)',
+    prompt: 'The girl ______ is wearing a yellow hair clip is my cousin.',
+    options: ['which', 'who', 'whom', 'whose'],
+    answer: 'who',
+    hint: '先行詞是 The girl（人），且關係代名詞在子句中當主詞 (is wearing...)。',
+    explanation: '先行詞為人且在關係子句中當主詞時，使用關代 who（或 that）。'
+  },
+  {
+    id: 21, level: 2, type: 'fill', topic: '未來式被動 (填空)',
+    prompt: '請填入正確的被動語態形式：<br>A new treehouse ______ ______ ______ (build) in the backyard next month.',
+    answer: ['will be built'],
+    hint: 'next month 表示未來式，未來被動公式為 will + be + p.p.。',
+    explanation: '新樹屋下個月將「被建造」，故填入 will be built。'
+  },
+  {
+    id: 22, level: 2, type: 'fill', topic: 'if / whether 間接問句 (填空)',
+    prompt: '合併句子：Does Leo like strawberry ice cream? + Ask him.<br>→ Ask him ______ ______ ______ strawberry ice cream.',
+    answer: ['if Leo likes', 'whether Leo likes'],
+    hint: 'Yes/No 問句用 if 或 whether 引導，去掉 Does 後動詞 like 要加 s。',
+    explanation: '可填入 if Leo likes 或 whether Leo likes。'
+  },
+  {
+    id: 23, level: 2, type: 'scramble', topic: '助動詞被動 (重組)',
+    prompt: '句子重組：這些可愛的植物應該每天被澆水 (watered)。',
+    words: ['These', 'cute', 'plants', 'should', 'be', 'watered', 'every', 'day.'],
+    answer: 'These cute plants should be watered every day.',
+    hint: '主詞 + should be + p.p. + 時間副詞。',
+    explanation: '正確語序為：These cute plants should be watered every day.'
+  },
+  {
+    id: 24, level: 2, type: 'scramble', topic: 'whether 間接問句 (重組)',
+    prompt: '句子重組：我不知道她是否會加入我們的社團 (club)。',
+    words: ['I', 'don't', 'know', 'whether', 'she', 'will', 'join', 'our', 'club.'],
+    answer: 'I don't know whether she will join our club.',
+    hint: 'I don't know + whether + 主詞 + will + 原形動詞...',
+    explanation: '正確語序為：I don't know whether she will join our club.'
+  },
+  {
+    id: 25, level: 2, type: 'mc', topic: '現在進行式被動',
+    prompt: 'Look! The birthday cake ______ by Mom in the kitchen right now.',
+    options: ['is decorated', 'is decorating', 'is being decorated', 'was decorated'],
+    answer: 'is being decorated',
+    hint: 'Look! 和 right now 表示「正在進行」，進行式被動公式為 am/is/are + being + p.p.。',
+    explanation: '蛋糕正在「被裝飾」，因此使用現在進行式被動 is being decorated。'
+  },
+  {
+    id: 26, level: 2, type: 'mc', topic: '【延伸文法】附加問句 (Tag Questions)',
+    prompt: 'Emma has never been to Tainan, ______?',
+    options: ['hasn't she', 'has she', 'doesn't she', 'did she'],
+    answer: 'has she',
+    hint: '前面有否定字 never（從未），所以後面附加問句要用「肯定」，且助動詞是 has！',
+    explanation: '前句含否定副詞 never 視為否定句，後句用肯定簡答，沿用助動詞 has → has she。'
+  },
+  {
+    id: 27, level: 2, type: 'fill', topic: '過去式 Wh- 間接問句 (填空)',
+    prompt: '改寫為間接問句：Where did you buy that cute notebook?<br>→ Tell me where ______ ______ that cute notebook.',
+    answer: ['you bought'],
+    hint: '去掉過去式助動詞 did 之後，動詞 buy 必須變回「過去式」！',
+    explanation: '原句為過去式 (did...buy)，改為直述語序時，buy 需變為過去式 bought → you bought。'
+  },
+  {
+    id: 28, level: 2, type: 'fill', topic: '介系詞後方只能用 whether',
+    prompt: '請填入 whether 或 if：<br>They are talking about ______ they should bake cookies for the party.',
+    answer: ['whether'],
+    hint: '空格前面是介系詞 about！介系詞後面只能接 whether，不可以用 if 喔！',
+    explanation: '在介系詞 (about) 之後引導名詞子句表示「是否」，只能用 whether。'
+  },
+  {
+    id: 29, level: 2, type: 'scramble', topic: 'if 間接問句 (重組)',
+    prompt: '句子重組：你可以告訴我這家甜點店今天是否有開嗎？',
+    words: ['Can', 'you', 'tell', 'me', 'if', 'the', 'bakery', 'is', 'open', 'today?'],
+    answer: 'Can you tell me if the bakery is open today?',
+    hint: 'Can you tell me + if + 主詞(the bakery) + be動詞 + 形容詞...',
+    explanation: '正確語序為：Can you tell me if the bakery is open today?'
+  },
+  {
+    id: 30, level: 2, type: 'scramble', topic: '【延伸文法】關係代名詞子句 (重組)',
+    prompt: '句子重組：我喜歡那隻有一條蓬鬆尾巴 (fluffy tail) 的小貓。',
+    words: ['I', 'like', 'the', 'kitten', 'which', 'has', 'a', 'fluffy', 'tail.'],
+    answer: 'I like the kitten which has a fluffy tail.',
+    hint: 'I like the kitten + 關代 which + 動詞 has + 受詞。',
+    explanation: '正確語序為：I like the kitten which has a fluffy tail.'
+  },
+
+  // ================= LEVEL 3: 夢幻挑戰 (15題) =================
+  {
+    id: 31, level: 3, type: 'mc', topic: '使役動詞的被動語態',
+    prompt: 'The students were made ______ the classroom before going home.',
+    options: ['clean', 'to clean', 'cleaning', 'cleaned'],
+    answer: 'to clean',
+    hint: '主動語態中 make + O + 原形動詞，但變成「被動語態」時，原本省略的 to 要還原回來！',
+    explanation: '使役動詞 make 改為被動語態時，後面必須接不定詞 to V，即 be made to V，故選 to clean。'
+  },
+  {
+    id: 32, level: 3, type: 'mc', topic: '感官動詞的被動語態',
+    prompt: 'The little boy was seen ______ into the flower shop just now.',
+    options: ['walk', 'to walk', 'walked', 'was walking'],
+    answer: 'to walk',
+    hint: '感官動詞 see 在主動語態接原形動詞或 V-ing；改為被動語態時，原形動詞必須還原 to！',
+    explanation: 'be seen 後面若接原形動詞概念，須還原為 to walk（選項中只有 to walk 符合文法）。'
+  },
+  {
+    id: 33, level: 3, type: 'mc', topic: '主要子句過去式的時態一致性',
+    prompt: 'Jenny asked me where I ______ the night before.',
+    options: ['go', 'went', 'had gone', 'will go'],
+    answer: 'had gone',
+    hint: '主要子句 asked 為過去式，且時間為 the night before（前一晚，比過去更早的過去），應用過去完成式！',
+    explanation: '主要子句為過去式 asked，從屬子句發生在更早之前，需用過去完成式 had + p.p.，故選 had gone。'
+  },
+  {
+    id: 34, level: 3, type: 'mc', topic: '句首主詞子句只能用 Whether',
+    prompt: '______ our team will win the dance contest or not is still unknown.',
+    options: ['If', 'Whether', 'That', 'What'],
+    answer: 'Whether',
+    hint: '整個子句放在「句首當主詞」表示「是否……」時，只能用 Whether，絕對不能用 If！',
+    explanation: '名詞子句置於句首當主詞時，表示「是否」只能使用 Whether。'
+  },
+  {
+    id: 35, level: 3, type: 'mc', topic: '【延伸文法】關係代名詞只能用 that 的情況',
+    prompt: 'This is the most interesting storybook ______ I have ever read.',
+    options: ['which', 'who', 'that', 'what'],
+    answer: 'that',
+    hint: '先行詞前面有「最高級 (the most interesting)」修飾時，關係代名詞只能用哪一個字？',
+    explanation: '先行詞前有最高級、序數或 all/no/every 等限定詞時，關係代名詞限定使用 that。'
+  },
+  {
+    id: 36, level: 3, type: 'fill', topic: '疑問詞 + 不定詞 (間接問句簡化)',
+    prompt: '改寫句子（將間接問句簡化為「疑問詞 + to V」）：<br>I don't know what I should wear to the party.<br>→ I don't know ______ ______ ______ to the party.',
+    answer: ['what to wear'],
+    hint: '當前後主詞相同時，what I should wear 可以簡化為 what + to + 原形動詞。',
+    explanation: '間接問句簡化公式：疑問詞 + should + V → 疑問詞 + to V，即 what to wear。'
+  },
+  {
+    id: 37, level: 3, type: 'fill', topic: '使役動詞被動還原 to (填空)',
+    prompt: '改寫為被動語態：Dad made me wash the dishes.<br>→ I ______ ______ ______ ______ the dishes by Dad.',
+    answer: ['was made to wash'],
+    hint: '過去式 made 改被動為 was made，別忘了把省略的 to 補回來！',
+    explanation: '主動 make + O + V → 被動 be made + to V，故填入 was made to wash。'
+  },
+  {
+    id: 38, level: 3, type: 'scramble', topic: '雙重文法整合：間接問句 + 被動語態',
+    prompt: '句子重組：沒有人知道這座城堡是何時被建造的 (built)。',
+    words: ['Nobody', 'knows', 'when', 'this', 'castle', 'was', 'built.'],
+    answer: 'Nobody knows when this castle was built.',
+    hint: 'Nobody knows + when + 主詞 + 過去式被動語態。',
+    explanation: '同時結合間接問句直述語序與過去簡單式被動：Nobody knows when this castle was built.'
+  },
+  {
+    id: 39, level: 3, type: 'scramble', topic: '雙重文法整合：whether + 被動語態',
+    prompt: '句子重組：我想知道邀請函 (the invitation) 是否已經被寄出了 (sent)。',
+    words: ['I', 'wonder', 'whether', 'the', 'invitation', 'has', 'been', 'sent.'],
+    answer: 'I wonder whether the invitation has been sent.',
+    hint: 'I wonder + whether + 主詞 + 現在完成式被動 (has been sent)。',
+    explanation: '正確語序為：I wonder whether the invitation has been sent.'
+  },
+  {
+    id: 40, level: 3, type: 'mc', topic: '不及物動詞不可用被動語態',
+    prompt: 'A big rainbow ______ in the sky right after the rain stopped.',
+    options: ['was appeared', 'appeared', 'is appeared', 'has been appeared'],
+    answer: 'appeared',
+    hint: 'appear（出現）和 happen（發生）一樣是「不及物動詞」，沒有受詞，永遠不能用被動語態！',
+    explanation: 'appear, happen, take place, belong to 等不及物動詞不可寫成被動語態，故選 appeared。'
+  },
+  {
+    id: 41, level: 3, type: 'mc', topic: '疑問詞提至句首的間接問句 (Do you think...)',
+    prompt: '______ do you think will win first prize in the art show?',
+    options: ['Who', 'Whom', 'Whether', 'That'],
+    answer: 'Who',
+    hint: '遇到 Do you think / believe / guess 時，疑問詞必須移到「最句首」！且空格在子句中當主詞。',
+    explanation: '主要子句為 Do you think，疑問詞須提到句首，且在子句中當主詞 (will win)，故選 Who。'
+  },
+  {
+    id: 42, level: 3, type: 'fill', topic: '片語動詞的被動語態 (保留介系詞)',
+    prompt: '改寫為被動語態：Everyone laughed at the clown.<br>→ The clown ______ ______ ______ by everyone.',
+    answer: ['was laughed at'],
+    hint: 'laugh at 是不可分割的片語動詞，改被動時介系詞 at 絕對不能漏掉！',
+    explanation: '片語動詞改被動須保留原本的介系詞或副詞，故為 was laughed at。'
+  },
+  {
+    id: 43, level: 3, type: 'fill', topic: 'whether + to V 簡化結構',
+    prompt: '改寫句子：She can't decide whether she should buy the pink backpack.<br>→ She can't decide ______ ______ ______ the pink backpack.',
+    answer: ['whether to buy'],
+    hint: 'whether 子句若前後主詞相同，可以簡化為 whether + to + 原形動詞（注意：if 不可這樣簡化！）。',
+    explanation: 'whether she should buy 可簡化為 whether to buy（if 則不可接 to V）。'
+  },
+  {
+    id: 44, level: 3, type: 'scramble', topic: '【延伸文法】Not only... but also... 句型 (重組)',
+    prompt: '句子重組：她不僅會彈鋼琴，還會唱歌。',
+    words: ['She', 'can', 'not', 'only', 'play', 'the', 'piano', 'but', 'also', 'sing.'],
+    answer: 'She can not only play the piano but also sing.',
+    hint: 'She can + not only + 動作1 + but also + 動作2。',
+    explanation: 'not only A but also B 連接兩個對等的原形動詞，正確語序為：She can not only play the piano but also sing.'
+  },
+  {
+    id: 45, level: 3, type: 'scramble', topic: '最終花圃慶典：感官動詞被動 + 地點片語',
+    prompt: '句子重組：有人看到那些小精靈在花叢中跳舞。(were seen)',
+    words: ['Those', 'little', 'fairies', 'were', 'seen', 'dancing', 'among', 'the', 'flowers.'],
+    answer: 'Those little fairies were seen dancing among the flowers.',
+    hint: '主詞(Those little fairies) + were seen + V-ing + 介系詞片語。',
+    explanation: '恭喜通關最終挑戰！正確語序為：Those little fairies were seen dancing among the flowers.'
+  }
+];
+
+// 可愛皮克敏風格「森靈小隊」解鎖進度 (共7隻可愛精靈夥伴，男女學生都會喜歡的自然療癒系)
+const squadCreatures = [
+  { minXP: 0,   emoji: '🌱', name: '小葉芽靈' },
+  { minXP: 80,  emoji: '🌷', name: '鬱金香波波' },
+  { minXP: 180, emoji: '🍄', name: '點點蘑菇寶' },
+  { minXP: 300, emoji: '🐝', name: '絨毛小蜜蜂' },
+  { minXP: 440, emoji: '🐰', name: '垂耳草地兔' },
+  { minXP: 600, emoji: '🦊', name: '櫻花小狐狸' },
+  { minXP: 760, emoji: '🦄', name: '彩虹森林獨角獸' }
+];
+
+// 遊戲狀態
+let state = {
+  xp: 0,
+  streak: 0,
+  solvedIds: new Set(),
+  mistakes: {},
+  currentQueue: [],
+  currentIndex: 0,
+  currentModeTitle: '',
+  answeredCurrent: false,
+  selectedMcOption: null,
+  scrambleSelected: []
+};
+
+// 初始化與更新頂部花圃狀態
+function updateHUD() {
+  document.getElementById('scoreVal').textContent = state.xp;
+  document.getElementById('streakVal').textContent = `${state.streak} ✨`;
+  document.getElementById('solvedVal').textContent = `${state.solvedIds.size} / 45`;
+  document.getElementById('mistakeCount').textContent = Object.keys(state.mistakes).length;
+
+  // 計算已解鎖的森靈夥伴
+  let unlockedCount = 0;
+  let latestCreature = squadCreatures[0];
+  let nextUnlockXP = 80;
+
+  const slotsContainer = document.getElementById('squadSlots');
+  slotsContainer.innerHTML = '';
+
+  squadCreatures.forEach((c, idx) => {
+    const slot = document.createElement('div');
+    if (state.xp >= c.minXP) {
+      unlockedCount++;
+      latestCreature = c;
+      nextUnlockXP = squadCreatures[idx + 1] ? squadCreatures[idx + 1].minXP : 900;
+      slot.className = 'member-slot unlocked';
+      slot.textContent = c.emoji;
+      slot.title = `已加入：${c.name}`;
+    } else {
+      slot.className = 'member-slot';
+      slot.textContent = '❓';
+      slot.title = `需要 ${c.minXP} 陽光露水才能拔出喔！`;
+    }
+    slotsContainer.appendChild(slot);
+  });
+
+  document.getElementById('sproutPot').textContent = latestCreature.emoji;
+  document.getElementById('squadTitle').textContent = `森靈小隊花圃 • 已收集 ${unlockedCount} / ${squadCreatures.length} 位夥伴`;
+  
+  if (unlockedCount < squadCreatures.length) {
+    document.getElementById('squadDesc').textContent = `最新夥伴「${latestCreature.name}」加入！再收集 ${nextUnlockXP - state.xp} 露水就能拔出下一隻！`;
+  } else {
+    document.getElementById('squadDesc').textContent = `太厲害啦！所有森靈夥伴都已齊聚一堂，你們是文法大師！`;
+  }
+
+  // 露水進度條
+  let prevXP = latestCreature.minXP;
+  let pct = Math.min(100, Math.round(((state.xp - prevXP) / (nextUnlockXP - prevXP)) * 100));
+  if (unlockedCount === squadCreatures.length) pct = 100;
+  document.getElementById('xpBar').style.width = pct + '%';
+
+  // 更新各區域開花進度
+  [1, 2, 3].forEach(lv => {
+    const lvQs = questionsDB.filter(q => q.level === lv);
+    const doneCount = lvQs.filter(q => state.solvedIds.has(q.id)).length;
+    document.getElementById(`prog-lv${lv}`).textContent = `開花進度：${doneCount} / ${lvQs.length} 朵`;
+    const card = document.getElementById(`card-lv${lv}`);
+    if (doneCount === lvQs.length) {
+      card.classList.add('completed');
+    }
+  });
+}
+
+function bounceSprout() {
+  const pot = document.getElementById('sproutPot');
+  pot.classList.remove('bounce');
+  void pot.offsetWidth;
+  pot.classList.add('bounce');
+}
+
+// 切換畫面
+function showScreen(screenId) {
+  ['mapScreen', 'quizScreen', 'resultScreen'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById(screenId).classList.remove('hidden');
+}
+
+function returnToMap() {
+  updateHUD();
+  showScreen('mapScreen');
+}
+
+// 開始關卡
+function startStage(level) {
+  const names = { 1: '🍀 幸運草微風草原', 2: '🌻 向日葵蜂蜜花園', 3: '🌸 櫻花樹下的秘密基地' };
+  state.currentModeTitle = names[level];
+  state.currentQueue = questionsDB.filter(q => q.level === level);
+  state.currentIndex = 0;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function startAllRandom() {
+  state.currentModeTitle = '🌈 隨機大探險 (全45題)';
+  state.currentQueue = [...questionsDB].sort(() => Math.random() - 0.5);
+  state.currentIndex = 0;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function retryMistakes() {
+  const mistakeIds = Object.keys(state.mistakes).map(Number);
+  if (mistakeIds.length === 0) return;
+  state.currentModeTitle = '🌱 錯題重新培育區';
+  state.currentQueue = questionsDB.filter(q => mistakeIds.includes(q.id));
+  state.currentIndex = 0;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+// 渲染題目
+function renderQuestion() {
+  const q = state.currentQueue[state.currentIndex];
+  state.answeredCurrent = false;
+  state.selectedMcOption = null;
+  state.scrambleSelected = [];
+
+  document.getElementById('qStageTag').textContent = `${state.currentModeTitle} • 第 ${state.currentIndex + 1}/${state.currentQueue.length} 題`;
+  const typeNames = { mc: '選擇題', fill: '填空題', scramble: '句子重組' };
+  document.getElementById('qTypeTag').textContent = `${typeNames[q.type]}｜${q.topic}`;
+  document.getElementById('qPrompt').innerHTML = q.prompt;
+  
+  const hintBox = document.getElementById('qHint');
+  hintBox.textContent = '💡 森靈小提示：' + q.hint;
+  hintBox.classList.add('hidden');
+
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+
+  document.getElementById('submitBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+
+  document.getElementById('mcContainer').classList.add('hidden');
+  document.getElementById('fillContainer').classList.add('hidden');
+  document.getElementById('scrambleContainer').classList.add('hidden');
+
+  if (q.type === 'mc') {
+    const mcDiv = document.getElementById('mcContainer');
+    mcDiv.innerHTML = '';
+    mcDiv.classList.remove('hidden');
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<strong>(${labels[idx]})</strong> <span>${opt}</span>`;
+      btn.onclick = () => selectMcOption(btn, opt);
+      mcDiv.appendChild(btn);
+    });
+  } else if (q.type === 'fill') {
+    const fillDiv = document.getElementById('fillContainer');
+    fillDiv.classList.remove('hidden');
+    const input = document.getElementById('fillInput');
+    input.value = '';
+    input.disabled = false;
+    setTimeout(() => input.focus(), 100);
+  } else if (q.type === 'scramble') {
+    const scDiv = document.getElementById('scrambleContainer');
+    scDiv.classList.remove('hidden');
+    const shuffled = [...q.words].sort(() => Math.random() - 0.5);
+    renderScramble(shuffled, []);
+  }
+}
+
+function toggleHint() {
+  document.getElementById('qHint').classList.toggle('hidden');
+}
+
+function selectMcOption(btnEl, optText) {
+  if (state.answeredCurrent) return;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+  state.selectedMcOption = optText;
+}
+
+// 句子重組渲染
+function renderScramble(bankWords, selectedWords) {
+  state.scrambleSelected = selectedWords;
+  const ansBox = document.getElementById('scrambleAnswer');
+  const bankBox = document.getElementById('scrambleBank');
+  ansBox.innerHTML = '';
+  bankBox.innerHTML = '';
+
+  selectedWords.forEach((w, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip in-answer';
+    chip.textContent = w;
+    chip.onclick = () => {
+      if (state.answeredCurrent) return;
+      const newSelected = [...selectedWords];
+      newSelected.splice(idx, 1);
+      renderScramble([...bankWords, w], newSelected);
+    };
+    ansBox.appendChild(chip);
+  });
+
+  bankWords.forEach((w, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = w;
+    chip.onclick = () => {
+      if (state.answeredCurrent) return;
+      const newBank = [...bankWords];
+      newBank.splice(idx, 1);
+      renderScramble(newBank, [...selectedWords, w]);
+    };
+    bankBox.appendChild(chip);
+  });
+}
+
+// 檢查答案
+function checkAnswer() {
+  if (state.answeredCurrent) return;
+  const q = state.currentQueue[state.currentIndex];
+  let isCorrect = false;
+  let userAnsDisplay = '';
+
+  if (q.type === 'mc') {
+    if (!state.selectedMcOption) {
+      alert('請先點選一個選項喔！');
+      return;
+    }
+    userAnsDisplay = state.selectedMcOption;
+    isCorrect = (state.selectedMcOption === q.answer);
+
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.disabled = true;
+      const text = btn.querySelector('span').textContent;
+      if (text === q.answer) btn.classList.add('correct');
+      else if (text === state.selectedMcOption && !isCorrect) btn.classList.add('wrong');
+    });
+
+  } else if (q.type === 'fill') {
+    const rawVal = document.getElementById('fillInput').value.trim();
+    if (!rawVal) {
+      alert('請先輸入你的英文答案喔！');
+      return;
+    }
+    document.getElementById('fillInput').disabled = true;
+    userAnsDisplay = rawVal;
+    const normalizedUser = rawVal.replace(/\s+/g, ' ').toLowerCase();
+    isCorrect = q.answer.some(ans => ans.toLowerCase() === normalizedUser);
+
+  } else if (q.type === 'scramble') {
+    if (state.scrambleSelected.length === 0) {
+      alert('請點擊單字卡組成句子喔！');
+      return;
+    }
+    userAnsDisplay = state.scrambleSelected.join(' ');
+    isCorrect = (userAnsDisplay === q.answer);
+  }
+
+  state.answeredCurrent = true;
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'block';
+
+  if (isCorrect) {
+    state.streak += 1;
+    const earnedXP = 15 + (q.level * 5) + Math.min(state.streak * 2, 10);
+    state.xp += earnedXP;
+    state.solvedIds.add(q.id);
+    delete state.mistakes[q.id];
+    bounceSprout();
+
+    fb.className = 'feedback-box success';
+    fb.innerHTML = `
+      <strong>🌸 太棒了！花朵盛開囉！ (+${earnedXP} ☀️陽光露水)</strong><br>
+      <div style="margin-top:6px;">📖 <strong>文法小筆記：</strong>${q.explanation}</div>
+    `;
+  } else {
+    state.streak = 0;
+    state.mistakes[q.id] = { question: q, userAns: userAnsDisplay };
+    const correctDisplay = Array.isArray(q.answer) ? q.answer[0] : q.answer;
+
+    fb.className = 'feedback-box error';
+    fb.innerHTML = `
+      <strong>🍃 差一點點！再多澆一點水試試看</strong><br>
+      <div>你的答案：<code>${userAnsDisplay}</code></div>
+      <div>正確答案：<strong>${correctDisplay}</strong></div>
+      <div style="margin-top:6px;">📖 <strong>文法小筆記：</strong>${q.explanation}</div>
+    `;
+  }
+
+  updateHUD();
+  document.getElementById('submitBtn').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !document.getElementById('quizScreen').classList.contains('hidden')) {
+    if (!state.answeredCurrent) {
+      checkAnswer();
+    } else {
+      nextQuestion();
+    }
+  }
+});
+
+function nextQuestion() {
+  state.currentIndex++;
+  if (state.currentIndex < state.currentQueue.length) {
+    renderQuestion();
+  } else {
+    showStageSummary();
+  }
+}
+
+function showStageSummary() {
+  showScreen('resultScreen');
+  document.getElementById('resultTitle').textContent = `🏆 ${state.currentModeTitle} — 探險結算`;
+  document.getElementById('resultSummary').innerHTML = `
+    你目前累積了 <strong>${state.xp} ☀️ 陽光露水</strong>，已經成功讓 <strong>${state.solvedIds.size} / 45</strong> 朵文法花朵盛開！<br>
+    快回花圃看看有沒有拔出新的可愛森靈夥伴吧！
+  `;
+  renderMistakesList();
+}
+
+function showMistakeBook() {
+  showScreen('resultScreen');
+  document.getElementById('resultTitle').textContent = '📒 森靈觀察筆記本';
+  const count = Object.keys(state.mistakes).length;
+  document.getElementById('resultSummary').textContent = count === 0 
+    ? '太厲害啦！目前沒有任何需要重新培育的錯題，繼續保持！' 
+    : `目前共有 ${count} 題需要再多加照顧，點擊下方按鈕可以重新培育這些題目喔！`;
+  renderMistakesList();
+}
+
+function renderMistakesList() {
+  const container = document.getElementById('mistakeListContainer');
+  container.innerHTML = '';
+  const mistakeEntries = Object.values(state.mistakes);
+
+  if (mistakeEntries.length > 0) {
+    document.getElementById('retryMistakesBtn').classList.remove('hidden');
+    mistakeEntries.forEach(item => {
+      const q = item.question;
+      const correctStr = Array.isArray(q.answer) ? q.answer[0] : q.answer;
+      const div = document.createElement('div');
+      div.className = 'mistake-item';
+      div.innerHTML = `
+        <div style="font-size:0.85rem; color:#be185d; font-weight:800;">[第${q.level}區 • ${q.topic}]</div>
+        <div style="margin:6px 0; font-weight:700;">${q.prompt}</div>
+        <div style="font-size:0.9rem;">你的作答：<span style="text-decoration:line-through;">${item.userAns}</span> ｜ 正解：<strong>${correctStr}</strong></div>
+        <div style="font-size:0.85rem; color:#475569; margin-top:4px;">解析：${q.explanation}</div>
+      `;
+      container.appendChild(div);
+    });
+  } else {
+    document.getElementById('retryMistakesBtn').classList.add('hidden');
+  }
+}
+
+// 啟動初始化
+updateHUD();
+</script>
+</body>
+</html>
